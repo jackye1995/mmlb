@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.mmlb</groupId>
+        <artifactId>mmlb-parent</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>mmlb-spark-lance</artifactId>
+    <packaging>jar</packaging>
+    <name>MMLB - Spark Lance Benchmark</name>
+
+    <dependencies>
+        <dependency><groupId>org.mmlb</groupId><artifactId>mmlb-spark-base</artifactId></dependency>
+        <dependency><groupId>org.apache.spark</groupId><artifactId>spark-sql_${scala.compat.version}</artifactId><scope>compile</scope></dependency>
+        <dependency><groupId>org.apache.spark</groupId><artifactId>spark-core_${scala.compat.version}</artifactId><scope>compile</scope></dependency>
+        <dependency><groupId>org.lance</groupId><artifactId>lance-spark-3.5_${scala.compat.version}</artifactId></dependency>
+        <dependency><groupId>org.apache.hadoop</groupId><artifactId>hadoop-aws</artifactId></dependency>
+        <dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-bundle</artifactId></dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.mmlb.benchmark.lance.LanceBenchmarkRunner</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters><filter><artifact>*:*</artifact><excludes><exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude><exclude>META-INF/*.RSA</exclude></excludes></filter></filters>
+                            <relocations><relocation><pattern>com.google</pattern><shadedPattern>shaded.com.google</shadedPattern></relocation></relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

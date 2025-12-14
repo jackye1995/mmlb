@@ -1,0 +1,31 @@
+[project]
+name = "mmlb"
+version = "0.1.0"
+description = "Multi-Modal Lakehouse Benchmark - CLI for running Lance vs Iceberg/Parquet benchmarks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [
+    { name = "MMLB Contributors" }
+]
+dependencies = [
+    "boto3>=1.28.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+mmlb = "mmlb.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mmlb"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+]
