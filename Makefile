@@ -2,7 +2,7 @@
 
 # Build Java modules, skipping tests
 install-java:
-	cd java && ./mvnw clean package -DskipTests
+	cd java && ./mvnw package -DskipTests
 
 # Clean Java build artifacts
 clean-java:

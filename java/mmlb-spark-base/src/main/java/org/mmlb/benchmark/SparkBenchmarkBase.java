@@ -86,7 +86,11 @@ public abstract class SparkBenchmarkBase {
     protected SparkSession.Builder createBaseBuilder() {
         return SparkSession.builder().appName(getClass().getSimpleName()).master("local[*]")
                 .config("spark.driver.memory", "8g").config("spark.sql.shuffle.partitions", "4")
-                .config("spark.executor.heartbeatInterval", "300s").config("spark.network.timeout", "3600s");
+                // Increase timeouts significantly for long-running operations (can take 30+ min)
+                .config("spark.executor.heartbeatInterval", "300s").config("spark.network.timeout", "3600s")
+                .config("spark.sql.broadcastTimeout", "3600")
+                .config("spark.storage.blockManagerSlaveTimeoutMs", "3600000")
+                .config("spark.rpc.askTimeout", "3600s");
     }
 
     protected void registerDataGenerationUDFs() {

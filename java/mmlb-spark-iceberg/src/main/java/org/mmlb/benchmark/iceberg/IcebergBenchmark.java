@@ -24,7 +24,14 @@ public class IcebergBenchmark extends SparkBenchmarkBase {
     @Override protected long writeData(Dataset<Row> data, String tableName) {
         cleanupTable(tableName);
         long start = System.currentTimeMillis();
-        data.coalesce(1).writeTo(tableName).create();
+        try {
+            data.coalesce(1)
+                .writeTo(tableName)
+                .tableProperty("write.target-file-size-bytes", "10737418240") // 10GB - ensures single file output
+                .create();
+        } catch (org.apache.spark.sql.catalyst.analysis.TableAlreadyExistsException e) {
+            throw new RuntimeException("Table already exists after cleanup: " + tableName, e);
+        }
         return System.currentTimeMillis() - start;
     }
 
