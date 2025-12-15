@@ -38,7 +38,12 @@ public class IcebergBenchmark extends SparkBenchmarkBase {
     @Override protected long readData(String tableName) {
         long start = System.currentTimeMillis();
         // collect() forces full materialization - all rows are read from S3 and pulled to driver
-        Row[] rows = (Row[]) spark.table(tableName).select(col("embedding")).collect();
+        // Set large split-size to ensure single worker reads entire file (apple-to-apple with Lance)
+        Row[] rows = (Row[]) spark.read()
+            .option("split-size", String.valueOf(config.getIcebergSplitSize()))
+            .table(tableName)
+            .select(col("embedding"))
+            .collect();
         long elapsed = System.currentTimeMillis() - start;
         // Verify we actually read the data
         if (rows.length != config.getNumRows()) {

@@ -25,6 +25,10 @@ public class BenchmarkConfig {
     public static final String DEFAULT_S3_BUCKET = "jack-lancedb-devland-us-east-1";
     public static final int DEFAULT_LANCE_UPLOAD_CONCURRENCY = 40;
     public static final int DEFAULT_LANCE_INITIAL_UPLOAD_SIZE = 20971520;
+    // Read-optimized defaults
+    public static final int DEFAULT_LANCE_IO_THREADS = 32;  // Match core count on r5.8xlarge
+    // Iceberg split size - set very large to ensure single worker reads entire file (apple-to-apple comparison)
+    public static final long DEFAULT_ICEBERG_SPLIT_SIZE = 10L * 1024 * 1024 * 1024;  // 10GB
 
     private final int embeddingDim;
     private final int numRows;
@@ -36,6 +40,8 @@ public class BenchmarkConfig {
     private final String s3Prefix;
     private final int lanceUploadConcurrency;
     private final int lanceInitialUploadSize;
+    private final int lanceIoThreads;
+    private final long icebergSplitSize;
     private final String configName;
 
     public BenchmarkConfig() {
@@ -50,6 +56,8 @@ public class BenchmarkConfig {
                 "spark-benchmark-" + System.currentTimeMillis() + "-" + UUID.randomUUID());
         this.lanceUploadConcurrency = getEnvInt("LANCE_UPLOAD_CONCURRENCY", DEFAULT_LANCE_UPLOAD_CONCURRENCY);
         this.lanceInitialUploadSize = getEnvInt("LANCE_INITIAL_UPLOAD_SIZE", DEFAULT_LANCE_INITIAL_UPLOAD_SIZE);
+        this.lanceIoThreads = getEnvInt("LANCE_IO_THREADS", DEFAULT_LANCE_IO_THREADS);
+        this.icebergSplitSize = getEnvLong("ICEBERG_SPLIT_SIZE", DEFAULT_ICEBERG_SPLIT_SIZE);
         this.configName = getEnvString("BENCHMARK_CONFIG_NAME", "default");
     }
 
@@ -57,6 +65,15 @@ public class BenchmarkConfig {
         String value = System.getenv(name);
         if (value != null && !value.isEmpty()) {
             try { return Integer.parseInt(value); }
+            catch (NumberFormatException e) { }
+        }
+        return defaultValue;
+    }
+
+    private static long getEnvLong(String name, long defaultValue) {
+        String value = System.getenv(name);
+        if (value != null && !value.isEmpty()) {
+            try { return Long.parseLong(value); }
             catch (NumberFormatException e) { }
         }
         return defaultValue;
@@ -77,6 +94,8 @@ public class BenchmarkConfig {
     public String getS3Prefix() { return s3Prefix; }
     public int getLanceUploadConcurrency() { return lanceUploadConcurrency; }
     public int getLanceInitialUploadSize() { return lanceInitialUploadSize; }
+    public int getLanceIoThreads() { return lanceIoThreads; }
+    public long getIcebergSplitSize() { return icebergSplitSize; }
     public String getConfigName() { return configName; }
 
     @Override
